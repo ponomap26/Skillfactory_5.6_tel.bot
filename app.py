@@ -1,6 +1,6 @@
 import telebot
 from config import keys, TOKEN
-from utils import Recalculation, Monyeconvertor
+from extensions import APIException, MoneyConvertor
 
 bot = telebot.TeleBot(TOKEN)
 
@@ -9,12 +9,12 @@ bot = telebot.TeleBot(TOKEN)
 def beginning(message: telebot.types.Message):
     text = "Что бы начать работу введите команду боту в следующем формате:\n<имя валюты>\
 <В какую валюту перевести>\
-<Количество переводимой валюты>\n Список доступных валют: /money"
+<Количество переводимой валюты>\n Список доступных валют: /values"
 
     bot.reply_to(message, text)
 
 
-@bot.message_handler(commands=['money'])
+@bot.message_handler(commands=['values'])
 def date(message: telebot.types.Message):
     text = 'Доступные валюты:'
     for key in keys.keys():
@@ -23,15 +23,15 @@ def date(message: telebot.types.Message):
 
 
 @bot.message_handler(content_types=['text', ])
-def convert(message: telebot.types.Message):
+def get_price(message: telebot.types.Message):
     try:
         values = message.text.split(' ')
         if len(values) != 3:
-            raise Recalculation("В Ведите 3 параметра. /help")
+            raise APIException("В Ведите 3 параметра. /help")
         quote, base, amount = values
         quote, base, = quote.lower(), base.lower()
-        total = Monyeconvertor.convert(quote, base, amount)
-    except Recalculation as e:
+        total = MoneyConvertor.convert(quote, base, amount)
+    except APIException as e:
         bot.reply_to(message, f"Ошибка пользователя\n{e}")
     except Exception as e:
         bot.reply_to(message, f"Не удается обработать команду\n{e} /help")
